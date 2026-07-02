@@ -1,0 +1,25 @@
+# 使用官方 Python 运行时作为父镜像
+FROM python:3.10-slim
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# 设置工作目录
+WORKDIR /app
+
+# 1. 设置清华镜像源并更新系统
+# RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list 
+
+# 设置清华 PyPI 镜像
+#RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+# 将当前目录内容复制到容器的 /app 中
+COPY . /app
+
+# 安装项目依赖
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 暴露端口 5702
+EXPOSE 5702
+
+# 运行应用
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5702"]
